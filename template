@@ -28,11 +28,11 @@
      snakePositionY db 3,4,5, 999 dup(?)
      
      ;the postion of food
-     foodPositionX dp 10    
-     foodPositionY dp 10
+     foodPositionX db 10    
+     foodPositionY db 10
      
      ;1, 2, 3, 4 stand for left, up, right, down respectively
-     currentDirection dp 1
+     currentDirection db 1
      
      
      ;------------------------------------------------------------------FOR LOGIC FUNC--------------------------------------------------------------
@@ -49,11 +49,19 @@ main PROC
  
 	MOV ax, @data
 	MOV ds, ax
-		
+	
+	
+	
 	drawBorder_func
 	drawMenu_func                               
-    	drawTitle_func
-        
+    
+     
+    
+     
+    
+    
+    
+    
     MOV ah,4ch
     INT 21h
 	
