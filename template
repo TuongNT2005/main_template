@@ -6,7 +6,7 @@
      
      ;----------------------------------------------------------------INCLUDE LIBRARIES--------------------------------------------------------------
      
-     INCLUDE D:\\code\\assembly\\pj\\print_game.inc.txt
+     ;INCLUDE D:\\code\\assembly\\pj\\print_game.inc.txt
      INCLUDE emu8086.inc
      
      
@@ -31,6 +31,9 @@
      foodPositionX dp 10    
      foodPositionY dp 10
      
+     ;1, 2, 3, 4 stand for left, up, right, down respectively
+     currentDirection dp 1
+     
      
      ;------------------------------------------------------------------FOR LOGIC FUNC--------------------------------------------------------------
      
@@ -46,10 +49,17 @@ main PROC
  
 	MOV ax, @data
 	MOV ds, ax
-
-  MOV ah,4ch
-  INT 21h
-	    
+		
+	drawBorder_func
+	drawMenu_func                               
+    	drawTitle_func
+        
+    MOV ah,4ch
+    INT 21h
+	
+    
 main ENDP
+
+
 
 END main
