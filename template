@@ -1,61 +1,265 @@
-.MODEL small
+.MODEL small 
+.STACK 100h
+.DATA
+     ;size 24x78
+     
+     
+     ;----------------------------------------------------------------INCLUDE LIBRARIES--------------------------------------------------------------
+     
+     ;INCLUDE D:\\code\\assembly\\pj\\print_game.inc.txt
+     INCLUDE emu8086.inc
+     
+     
+     
+     
+     ;------------------------------------------------------------------FOR DRAW FUNC--------------------------------------------------------------
+     
+     mapHorizontalBorder db 78 dup(219),13,10,'$'
+     mapVerticalBorder db 22 dup (219,'                                                                            ',219,13,10),'$'
+     newLine dw 10,13,'$'
+ 
+     ;the position of title pixcels x=y=120 nums    WRONG POSITION -> FIND CORRECT POSITION
+     titlePositionY db 13, 14, 15, 16, 17, 20, 24, 29, 35, 36, 37, 41, 42, 43, 46, 50, 53, 54, 55, 59, 60, 61, 62, 63,12, 20, 24, 28, 30, 34, 38, 41, 44, 46, 50, 53, 56, 59, 64, 12, 20, 24, 27, 31, 34, 41, 44, 46, 50, 53, 56, 59, 64, 13, 14, 15, 20, 21, 22, 23, 24, 27, 31, 34, 37, 38, 41, 42, 43, 46, 47, 48, 49, 50, 53, 54, 55, 59, 60, 61, 62,16, 20, 24, 27, 28, 29, 30, 31, 34, 38, 41, 46, 50, 53, 56, 59, 64, 16, 20, 24, 27, 31, 34, 38, 41, 46, 50, 53, 56, 59, 64, 12, 13, 14, 15, 16, 20, 24, 27, 31, 35, 36, 37, 41, 46, 50, 53, 54, 55, 59, 64,'$'
+     titlePositionX db 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12,'$'
+     cnt_picels db 150
+     
+     ;the position of snake pixcels
+     snakePositionX db 5,5,5, 999 dup(?)
+     snakePositionY db 3,4,5, 999 dup(?)
+     
+     ;the head and tail index of snake position
+     ;use those index to draw the updated snake
+     snakeHeadIndex db 0
+     snakeTailIndex db 3
+     
+     ;the postion of food
+     foodPositionX db 10    
+     foodPositionY db 10
+     
+     ;1010b, 0101b, 1001b, 0110b stand for left, up, right, down respectively
+     currentDirection db 1001b
+     fps db 30
+     
+     
+     ;------------------------------------------------------------------FOR LOGIC FUNC--------------------------------------------------------------
+     
+     ;value = 0 stand for false, value = 1 stand for true 
+     isFoodEaten db 0
+     isSnakeDied db 0
+     
+     ;temporary varible
+     tmp db ?
 
-DRAW_BORDER_FUNC MACRO
-        
-    MOV ah,9
-	LEA dx, mapHorizontalBorder
-	INT 21h
-	LEA dx, mapVerticalBorder
-	INT 21h
-	LEA dx, mapHorizontalBorder
-	INT 21h
+.CODE
 
-DRAW_BORDER_FUNC ENDM
-
-
-DRAW_MENU_FUNC MACRO
+main PROC
+ 
+	MOV ax, @data
+	MOV ds, ax
     
-    	MOV ah, 2   	;choose setup cusor opstion
-	MOV dh, 12   	;dh: x position
-	MOV dl, 35   	;dl: y position
-	MOV bh, 0   	;bh: page
-	INT 10h     	;execute setup cusor opstion
-	PRINT "1. Play"
-	MOV dh, 14   	;dh: x position
-	MOV dl, 35   	;dl: y position
-	INT 10h     	;execute setup cusor opstion
-	PRINT "2. Guide"
-    	MOV dh, 16   	;dh: x position
-	MOV dl, 35   	;dl: y position
-	INT 10h     	;execute setup cusor opstion
-    	PRINT "3. Exit"    
-
-DRAW_MENU_FUNC ENDM
-
-DRAW_TITLE_FUNC MACRO
-
-	LOCAL DRAW_TITLE_PIXCELS_LABEL
-
-    LEA si, titlePositionX
-    LEA di, titlePositionY        
+    mov al, 'd'
+    CALL REFERANCE_DIRECTION_FUNC
+     
+	;int 16h                            
+    
+    MAIN_FLOW_LABEL:
+        CALL CLEAR_SCREEN
+        DRAW_BORDER_FUNC    
+	    DRAW_MENU_FUNC
+        
+        CALL WAIT_FOR_OPTION_FUNC
+        MOV AH, 00h   ;get pressed char and store it into AL
+        INT 16h
+    
+        CMP al, 31h
+        JE  GAME_LOOP_LABEL    
+        CMP al, 32h
+        JE  PRINT_GUIDE_LABEL
+        CMP al, 33h
+        JE  END_PROGRAME_LABEL
+        JNE OPTION_ERROR_LABEL
+    
+        GAME_LOOP_LABEL:
+             CALL RECOVER_STATUS_FUNC
+             CALL CLEAR_SCREEN
+              
+             DRAW_BORDER_FUNC
+             ;drawFood_func
+             ;drawSnake_func
+             
+             START_LABEL:
+             
+             MOV fps,30
+             MOV al, currentDirection
+             
+             GET_DIRECTION_LABEL: ;wait for 30 runtime to get the direction
+                MOV ah, 01h   ;check keyboard buffer ZF = 1 if there are char in it 
+                INT 16h
+                DEC fps
+                CMP fps,0
+                JE  CONTINUE_1_LABEL
+                JNE GET_DIRECTION_LABEL
+             
+             
+             CONTINUE_1_LABEL:
+             
+             MOV ah, 01h   ;check keyboard buffer ZF = 1 if there are char in it 
+             INT 16h
+             JZ CONTINUE_8_LABEL
+             ;MOV al, currentDirection
+             MOV ah, 00h   ;get pressed char and store it into AL
+             INT 16h
+             
+             CONTINUE_8_LABEL:
+         
+             CALL REFERANCE_DIRECTION_FUNC ;get the correct bincode for currentDirection 
+             
+             OR bl, al, currentDirection 
+             CMP bl, 1111b     ;if current direction and input direction is opposite there are no change in currentDirection
+                               ;current direction and input direction is opposite while those OR operator has value = 1111b
+             JNE CONTINUE_2_LABEL
+             MOV currentDirection, al
+             
+             CONTINUE_2_LABEL:
+             ;DRAW_UPDATED_SNAKE_FUNC
+             
+             CMP isFoodEaten, 1
+             JNE CONTINUE_3_LABEL
+             ;CREATE_FOOD_POSTION_FUNC
+             ;DRAW_FOOD_FUNC
+             ;CALUCATE_SCORE_FUNC
+             
+             CONTINUE_3_LABEL:
+             CMP isSnakeDied, 1
+             JNE START_LABEL 
+             CALL CLEAR_SCREEN
+             
+             CONTINUE_4_LABEL:
+             ;DRAW_SUBMENU_FUNC
+             CALL WAIT_FOR_OPTION_FUNC
+             CMP al, 31
+             JE  GAME_LOOP_LABEL
+             CMP al, 32
+             JE  GAME_LOOP_LABEL
+             MOV ah, 2   	;choose setup cusor opstion
+	         MOV dh, 20   	;dh: x position
+	         MOV dl, 25   	;dl: y position
+	         MOV bh, 0   	;bh: page
+	         INT 10h         ;execute setup cusor opstion
+             PRINT "No option is mathed! Try agian."
+             JMP CONTINUE_4_LABEL
+             
+             
+    
+    
+    
+        PRINT_GUIDE_LABEL:
+            CALL CLEAR_SCREEN
+            ;drawGuide_func
+        
+            MOV ah, 2   	;choose setup cusor opstion
+	        MOV dh, 20   	;dh: x position
+	        MOV dl, 25   	;dl: y position
+	        MOV bh, 0   	;bh: page
+	        INT 10h         ;execute setup cusor opstion
+            PRINT "Press any key to back to the menu."
             
-    DRAW_TITLE_PIXCELS_LABEL:
-	        MOV dh, [si]   	;dh: x position
-	        MOV dl, [di]   	;dl: y position
-	        MOV bh, 0   	;page number
-	        MOV ah, 2   	;choose setup cusor opstion
-	        INT 10h     	;execute setup cusor opstion
-	        MOV al, 0DBh 	;hex code of char
-	        MOV bh, 0    	;page number
-	        MOV bl, 0Ah  	;color code
-	        MOV cx, 1   	;number of char 
-	        MOV ah, 09h  	;draw char mode
-	        INT 10h      	;execute draw char
-            INC si
-            INC di
-            DEC cnt_picels
-            
-            CMP cnt_picels,0
-            JNE DRAW_TITLE_PIXCELS_LABEL
-      
-DRAW_TITLE_FUNC ENDM
+            CALL WAIT_FOR_OPTION_FUNC
+            MOV AH, 00h   ;get pressed char and store it into AL
+            INT 16h
+            JNZ MAIN_FLOW_LABEL
+        
+         
+    
+    
+    
+        END_PROGRAME_LABEL:
+            CALL CLEAR_SCREEN
+        
+            MOV ah, 2   	;choose setup cusor opstion
+	        MOV dh, 14   	;dh: x position
+	        MOV dl, 25   	;dl: y position
+	        MOV bh, 0   	;bh: page
+	        INT 10h         ;execute setup cusor opstion
+            PRINT "Programe ended!. Thanks for playing."
+        
+            MOV AH, 4ch
+            INT 21h
+    
+    
+    
+    OPTION_ERROR_LABEL:
+        MOV ah, 2   	;choose setup cusor opstion
+	    MOV dh, 20   	;dh: x position
+	    MOV dl, 25   	;dl: y position
+	    MOV bh, 0   	;bh: page
+	    INT 10h         ;execute setup cusor opstion
+        PRINT "No option is mathed! Try agian."
+        JMP MAIN_FLOW_LABEL
+	
+    
+main ENDP
+
+WAIT_FOR_OPTION_FUNC PROC
+        
+        WAIT_LABEL:
+        MOV AH, 01h   ;check keyboard buffer ZF = 1 if there are char in it 
+        INT 16h
+        JZ WAIT_LABEL     ;if there are no char in keyboard buffer continue to wait the input
+        RET
+        
+WAIT_FOR_OPTION_FUNC ENDP
+
+
+REFERANCE_DIRECTION_FUNC PROC
+        ;1010b, 0101b, 1001b, 0110b stand for left, up, right, down respectively
+    
+        CMP al, currentDirection
+        JNE  TYPED_LABEL
+        RET
+        
+        TYPED_LABEL:
+        CMP al, 'a'
+        JNE NOT_LEFT_LABEL
+        MOV al, 1010b
+        RET 
+        
+        NOT_LEFT_LABEL:
+        CMP al, 'w'
+        JNE NOT_UP_LABEL
+        MOV al, 0101b
+        RET
+        
+        NOT_UP_LABEL:
+        CMP al, 'd'
+        JNE NOT_RIGHT_LABEL
+        MOV al, 1001b
+        RET
+        
+        NOT_RIGHT_LABEL:
+        CMP al, 's'
+        JNE INVALID_DIRECTION_LABEL
+        MOV al, 0110b
+        RET
+        
+        INVALID_DIRECTION_LABEL:
+        RET
+
+REFERANCE_DIRECTION_FUNC ENDP
+
+RECOVER_STATUS_FUNC PROC
+    
+        MOV foodPositionX, 10    
+        MOV foodPositionY, 10
+        MOV currentDirection, 1001b
+        MOV isFoodEaten, 0
+        MOV isSnakeDied, 0
+        MOV snakeHeadIndex, 0
+        MOV snakeTailIndex, 3
+        RET
+    
+RECOVER_STATUS_FUNC ENDP    
+
+DEFINE_CLEAR_SCREEN
+
+END main
