@@ -31,7 +31,8 @@
      ;use those index to draw the updated snake
      snakeHeadIndex db 2
      snakeTailIndex db 0
-     
+	score db 2
+
      ;the postion of food
      foodPositionX dw 10    
      foodPositionY dw 10
