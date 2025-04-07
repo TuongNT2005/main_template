@@ -29,8 +29,8 @@
      
      ;the head and tail index of snake position
      ;use those index to draw the updated snake
-     snakeHeadIndex db 0
-     snakeTailIndex db 3
+     snakeHeadIndex db 2
+     snakeTailIndex db 0
      
      ;the postion of food
      foodPositionX db 10    
