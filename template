@@ -254,8 +254,8 @@ RECOVER_STATUS_FUNC PROC
         MOV currentDirection, 1001b
         MOV isFoodEaten, 0
         MOV isSnakeDied, 0
-        MOV snakeHeadIndex, 0
-        MOV snakeTailIndex, 3
+        MOV snakeHeadIndex, 2
+        MOV snakeTailIndex, 0
         RET
     
 RECOVER_STATUS_FUNC ENDP    
