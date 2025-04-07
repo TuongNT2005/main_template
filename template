@@ -33,8 +33,8 @@
      snakeTailIndex db 0
      
      ;the postion of food
-     foodPositionX db 10    
-     foodPositionY db 10
+     foodPositionX dw 10    
+     foodPositionY dw 10
      
      ;1010b, 0101b, 1001b, 0110b stand for left, up, right, down respectively
      currentDirection db 1001b
