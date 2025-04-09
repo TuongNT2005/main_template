@@ -24,8 +24,8 @@
      cnt_picels db 150
      
      ;the position of snake pixcels
-     snakePositionX db 5,5,5, 999 dup(?)
-     snakePositionY db 3,4,5, 999 dup(?)
+     snakePositionX db 12,12,12, 999 dup(?)
+     snakePositionY db 37,38,39, 999 dup(?)
      
      ;the head and tail index of snake position
      ;use those index to draw the updated snake
