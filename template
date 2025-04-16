@@ -8,6 +8,8 @@
      
      ;INCLUDE D:\\code\\assembly\\pj\\print_game.inc.txt
      INCLUDE emu8086.inc
+     ;INCLUDE logicGameColection.inc
+	;INCLUDE drawFuncCollection.inc
      
      
      
